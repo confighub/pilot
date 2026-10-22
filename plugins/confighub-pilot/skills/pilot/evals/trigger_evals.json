@@ -1,0 +1,19 @@
+{
+  "positive": [
+    "run pilot",
+    "Run Pilot for this repo",
+    "use Pilot to assess this repo",
+    "what should Pilot do next?",
+    "route this failure through Pilot",
+    "make this app deployable",
+    "make this repeatable as an app",
+    "prepare this app for deployment without changing the repository"
+  ],
+  "negative": [
+    "show me the cub unit apply syntax",
+    "what does ConfigHub mean by spaces?",
+    "list Kubernetes pods in this namespace",
+    "run the daily ConfigHub workbench",
+    "scan this unit for policy violations"
+  ]
+}

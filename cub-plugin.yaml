@@ -1,0 +1,6 @@
+name: pilot
+version: "0.7.0"
+commands:
+  - name: pilot
+    entrypoint: bin/pilot
+    summary: "Install and run ConfigHub Pilot"

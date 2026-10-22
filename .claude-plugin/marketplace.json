@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "description": "ConfigHub Pilot for Claude. Pilot stays quiet in every session until you type /confighub-pilot:on, and needs the Pilot command-line tool installed first.",
+  "name": "confighub-pilot",
+  "owner": {
+    "name": "ConfigHub"
+  },
+  "plugins": [
+    {
+      "author": {
+        "name": "ConfigHub"
+      },
+      "category": "development",
+      "description": "Pilot commands, hooks, and skills. Type /confighub-pilot:on in a session to switch Pilot on there only; /confighub-pilot:off switches it off.",
+      "homepage": "https://github.com/confighub/pilot",
+      "name": "confighub-pilot",
+      "source": "./plugins/confighub-pilot"
+    }
+  ]
+}

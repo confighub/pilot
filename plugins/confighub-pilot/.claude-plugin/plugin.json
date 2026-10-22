@@ -1,0 +1,16 @@
+{
+  "author": {
+    "name": "ConfigHub"
+  },
+  "description": "Portable Pilot slash commands, hooks, skills, and status surfaces over the installed Pilot core.",
+  "homepage": "https://github.com/confighub/pilot",
+  "keywords": [
+    "confighub",
+    "pilot",
+    "gitops",
+    "kubernetes",
+    "ops"
+  ],
+  "name": "confighub-pilot",
+  "version": "0.7.0"
+}

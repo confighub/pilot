@@ -1,0 +1,144 @@
+{
+  "description": "Hooks for the confighub-ai plugin. Every hook is inert unless PILOT_ACTIVE is exactly 1 or the person using the session typed /confighub-pilot:on, so an installed plugin does not inspect, block, emit into, or create state for unrelated Claude sessions. The session switch hook runs first on UserPromptSubmit and acts only on the exact /confighub-pilot:on, :off and :status prompts; on PreToolUse Bash it refuses commands that name the switch directory while Pilot is active. SessionStart reads fast local context and shows a compact Pilot hello. The PreToolUse Bash group binds the default-deny Scout command-shape gate, Cub flag/exact-revision validation, the non-blocking retired --web warning, the authenticated-approval gate including the digest-pinned standalone cub-* add-on perimeter, Bash activity tracing, and skill attribution. A separate PreToolUse Skill group records model-selected Skill loads. Canonical Scout MCP tool names have their own default-deny matcher; these command-shape gates are defense in depth, not an OS/process sandbox, and never confer authoritative/T2/T3 proof. PostToolUse governed-write enforcement injects corrective context when proof is incomplete. UserPromptSubmit restores the branded response contract and injects deterministic URL/journey routing. Stop appends the turn's measured token-usage delta to the activity trace silently and, when something ran this turn, draws a small Pilot cockpit card under the reply; SessionEnd flushes the final usage delta and runs the advisory harvest discipline audits, silent when clean.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/enforce_governed_write.sh\"",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session_switch.sh\"",
+            "timeout": 3,
+            "type": "command"
+          },
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/validate_cub_scout.sh\"",
+            "timeout": 5,
+            "type": "command"
+          },
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/validate_cub_flags.sh\"",
+            "timeout": 5,
+            "type": "command"
+          },
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/validate_cub_web.sh\"",
+            "timeout": 5,
+            "type": "command"
+          },
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/validate_execution_approval.sh\"",
+            "timeout": 5,
+            "type": "command"
+          },
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/trace_on_bash.sh\"",
+            "timeout": 5,
+            "type": "command"
+          },
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/skill_attribution.sh\"",
+            "timeout": 3,
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/trace_on_skill.sh\"",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "Skill"
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/validate_cub_scout.sh\"",
+            "timeout": 5,
+            "type": "command"
+          }
+        ],
+        "matcher": "mcp__cub-scout__.*"
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/harvest_audit_session_end.sh\"",
+            "timeout": 10,
+            "type": "command"
+          },
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/usage_on_stop.sh\"",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session_start.sh\"",
+            "timeout": 2,
+            "type": "command"
+          }
+        ],
+        "matcher": "startup"
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/usage_on_stop.sh\"",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session_switch.sh\"",
+            "timeout": 3,
+            "type": "command"
+          },
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/surface_restore.sh\"",
+            "timeout": 3,
+            "type": "command"
+          },
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/url_drop_in.sh\"",
+            "timeout": 3,
+            "type": "command"
+          },
+          {
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/journey_drop_in.sh\"",
+            "timeout": 3,
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
+}

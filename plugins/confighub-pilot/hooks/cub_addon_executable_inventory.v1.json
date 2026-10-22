@@ -1,0 +1,39 @@
+{
+  "schema": "confighub-pilot.cub-addon-executable-inventory.v1",
+  "status": "reviewed-static-hook-policy",
+  "default_disposition": "ASK",
+  "basename_prefixes": [
+    "cub-"
+  ],
+  "source_assertions": [
+    {
+      "source": "pilot/capability-provider-registry.json",
+      "selector": "providers[*].pack.discovery.binary",
+      "required_relation": "every current standalone discovery binary begins with cub- and is therefore covered by basename_prefixes"
+    },
+    {
+      "source": "pilot/capability-provider-registry.json",
+      "selector": "providers[provider_id=cub-scout].provider_id",
+      "required_relation": "the current mixed-capability standalone provider identity begins with cub- and is therefore covered by basename_prefixes"
+    },
+    {
+      "source": "github:confighub/examples",
+      "commit": "57c1405deefc4396c5eddf47d153494dd64c0eac",
+      "path": "eks-manager/Makefile",
+      "project_directory": "eks-manager",
+      "standalone_executable": "cub-eks",
+      "plugin_form": "cub eks",
+      "required_relation": "the reviewed Makefile builds bin/cub-eks and distinguishes standalone cub-eks from plugin-form cub eks"
+    }
+  ],
+  "reviewed_prefixed_executables": [
+    "cub-eks"
+  ],
+  "reviewed_nonprefixed_aliases": [],
+  "non_claims": [
+    "A reviewed basename does not authenticate the executable bytes found on PATH or at an arbitrary path.",
+    "No direct standalone add-on invocation is admitted by this inventory; every prefix-covered basename and reviewed alias asks the person before it runs in a Pilot-active assistant shell, except cub-scout, which the Scout hook decides.",
+    "A literal executable renamed outside the cub- prefix and outside this exact inventory is not detected by basename classification.",
+    "The reviewed examples source identifies eks-manager as the project directory, not an executable basename; only cub-eks is admitted as the standalone executable identity, and it asks before it runs."
+  ]
+}
