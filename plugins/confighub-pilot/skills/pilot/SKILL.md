@@ -643,7 +643,7 @@ fenced block in the user's own terminal:
    stays linked to its base so trusted changes can flow down; a "target" is
    where a Space's config is delivered. On cub v0.1.101 or newer this command
    ALSO auto-creates the Argo Application that points at the dev Space, so
-   manual Argo wiring is NOT a step (confighubai/confighub#4795; opt out with
+   manual Argo wiring is NOT a step (opt out with
 	   `--no-argo-app`). That behavior remains exact-reviewed in v0.4.5; the
 	   v0.2.9, v0.2.11, and v0.4.4 reviewed profiles remain version-bound and
 	   v0.2.10 remains anticipated-source-reviewed. In v0.4.5 the bridge-era deploy verbs

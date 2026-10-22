@@ -114,7 +114,7 @@ if [[ -z "$PILOT_SCRIPTS" ]]; then
         touch "$DIAG_MARKER" 2>/dev/null || true
         cat >&2 <<'DIAG'
 [confighub-ai hook] activity trace disabled — could not find scripts/cub-trace-emit.
-[confighub-ai hook] To enable: clone https://github.com/confighubai/pilot
+[confighub-ai hook] To enable: install Pilot by following the instructions at https://github.com/confighub/pilot
 [confighub-ai hook] then export PILOT_ROOT=/path/to/pilot
 [confighub-ai hook] in your shell rc and restart Claude Code. See plugin README §Install.
 DIAG

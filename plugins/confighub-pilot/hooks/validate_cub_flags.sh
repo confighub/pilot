@@ -182,8 +182,7 @@ Both need a v0.5.7 ConfigHub server: the /api/attest endpoint they use does
 not exist on v0.5.4 through v0.5.6.
 
 'cub unit approve' still exists in the client and server, unchanged, but is
-refused by Pilot: it is versioned legacy, on its way out upstream
-(confighubai/confighub#5473, #5475, #5476).
+refused by Pilot: it is versioned legacy, on its way out upstream.
 
 See: cub variant approve --help"
 fi

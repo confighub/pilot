@@ -24,6 +24,10 @@ is supported.
 If you have no GitHub SSH key and Claude cannot add the marketplace, run
 `export CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` and try again.
 
+Every route, what each one does and how to remove Pilot are in
+[docs/user/INSTALL_PILOT.md](docs/user/INSTALL_PILOT.md). The guides that Pilot
+points you to are in [docs/user/](docs/user/).
+
 ## Check that it worked
 
 ```text
