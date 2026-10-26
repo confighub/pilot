@@ -17,8 +17,8 @@
 
 set -eu
 
-PILOT_VERSION="0.7.0"
-PILOT_WHEEL_SHA256="1cb85a0dd52a426ec2a2011bd9e983613cbe8b24675981a566a50deab64b6742"
+PILOT_VERSION="0.7.1"
+PILOT_WHEEL_SHA256="9410074d0a094b8811e8c15dd2cb63c8c1783edb0e5a662ca72353b802c4ca6f"
 PILOT_RELEASE_BASE_URL="https://github.com/confighub/pilot/releases/download"
 PILOT_WHEEL_NAME="confighub_pilot-${PILOT_VERSION}-py3-none-any.whl"
 PILOT_PLUGIN_ID="confighub-pilot@confighub-pilot"

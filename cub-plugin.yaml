@@ -1,5 +1,5 @@
 name: pilot
-version: "0.7.0"
+version: "0.7.1"
 commands:
   - name: pilot
     entrypoint: bin/pilot
