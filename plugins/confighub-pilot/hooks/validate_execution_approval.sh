@@ -2690,9 +2690,11 @@ def protected_cub(
     noun, noun_index, ambiguous = next_cub_command_word(tokens, 0)
     if ambiguous:
         return "cub <ambiguous-pre-verb-option>"
-    if noun in {"apply", "docgen", "run", "upgrade"}:
+    if noun in {"apply", "docgen", "run", "upgrade", "version"}:
         # These are root leaves; the first positional after them is an argument
         # (a function name for run, a file for apply), not a Cub subcommand.
+        # `version` takes only flags (v0.9.1 added --client), so a flag after
+        # it must not read as an unknown option before a subcommand.
         verb, verb_index = "", noun_index
     else:
         verb, verb_index, ambiguous = next_cub_command_word(tokens, noun_index + 1)
@@ -4188,13 +4190,29 @@ def interactive_cub_scope(command: str, protected: str) -> str:
         # machine is host-reviewable like a bounded ConfigHub mutation.
         # `protected_cub` classifies `--delete-config` separately as a
         # destructive stop before this branch would ever see it.
+        # `up` takes the cub v0.9.0 flags and, for an older cub, the ones
+        # v0.9.0 renamed or removed (--no-argobot, --argobot-oci).
         value_flags = (
-            frozenset({"--argobot-oci", "--context", "--mount", "--name", "--space"})
+            frozenset({
+                "--argobot-oci",
+                "--context",
+                "--controller",
+                "--controller-version",
+                "--mount",
+                "--name",
+                "--space",
+            })
             if verb == "up"
             else frozenset({"--context", "--name"})
         )
         boolean_flags = (
-            frozenset({"--no-argobot", "--no-placeholder-gate", "--no-ports"})
+            frozenset({
+                "--no-argobot",
+                "--no-k8sbot",
+                "--no-placeholder-gate",
+                "--no-ports",
+                "--prune",
+            })
             if verb == "up"
             else frozenset({"--force"})
         )
@@ -4213,6 +4231,14 @@ def interactive_cub_scope(command: str, protected: str) -> str:
         context = one_reviewed_value(values, "--context")
         if context and not static_cub_identifier(context):
             return ""
+        controller = one_reviewed_value(values, "--controller")
+        if "--controller" in values and controller not in {"argo", "sveltos", "flux"}:
+            return ""
+        controller_version = one_reviewed_value(values, "--controller-version")
+        if "--controller-version" in values and not re.fullmatch(
+            r"v?[0-9]+(\.[0-9]+){0,2}|stable", controller_version
+        ):
+            return ""
         flag_name = one_reviewed_value(values, "--name")
         positional_name = positionals[3] if len(positionals) == 4 else ""
         if flag_name and positional_name:
@@ -4222,10 +4248,18 @@ def interactive_cub_scope(command: str, protected: str) -> str:
             return ""
         cluster_label = f"`{name}`" if name else "the default-named"
         context_note = f" in ConfigHub context `{context}`" if context else ""
+        controller_note = f" with controller `{controller}`" if controller else ""
+        # cub v0.9.0 made pruning opt-in: with --prune the controller deletes
+        # what a removed deployment deployed. Say so in the prompt.
+        prune_note = (
+            "; --prune lets the controller delete what a removed deployment deployed"
+            if "--prune" in values
+            else ""
+        )
         action = "create" if verb == "up" else "tear down"
         return (
             f"{action} {cluster_label} local kind cluster on this machine"
-            f"{context_note}"
+            f"{controller_note}{context_note}{prune_note}"
         )
 
     if noun in UNBOUNDED_ORGANIZATION_LIST_NOUNS and verb == "list":
@@ -4512,7 +4546,8 @@ RELAXED_READ_LABEL_SUFFIXES = (
 # Field names that hold a worker's credential. A read that asks for one by
 # name is asking to be shown a secret.
 RELAXED_SECRET_FIELD = re.compile(r"BridgeWorker|ClaimToken|(?<![A-Za-z])Secret(?![a-z])")
-# The command groups built into the newest reviewed cub (v0.8.30). A first word
+# The command groups built into the newest reviewed cub (v0.9.1, whose groups
+# match v0.8.30's; it added only leaves and flags inside existing groups). A first word
 # outside this list is a separately installed plugin. The hook's older noun
 # list predates some of these (changeworkflow, group, and from v0.8.30 apply,
 # channel, command, commandrun, review-comment, serviceaccount), and labels
@@ -4620,15 +4655,19 @@ def relaxed_is_read(noun: str, verb: str, third: str) -> bool:
         # `list` must not read as a verb.
         return False
     if noun == "serviceaccount" and verb == "token":
-        # `token list` shows ids and dates, never the tokens; `token create`
-        # prints a token and `token revoke` withdraws one.
-        return third == "list"
+        # `token list` and (v0.9.1) `token get` show a token's record, never the
+        # token: the id, issuer, dates and revoked flag, since ConfigHub does not
+        # keep the token. `token create` prints a token, `token revoke` withdraws
+        # one and `token delete` (v0.9.1) removes its record.
+        return third in {"list", "get"}
     if noun in {"auth", "api", "run", "function", "invocation"}:
         # `function list|explain` are reads; `function get|vet|do|set` and
         # `run` execute a function, and `invocation invoke` likewise.
         return noun == "function" and verb in {"list", "explain"}
     if verb == "key":
-        return third == "list"
+        # `key list` and (v0.9.1) `key get` show a service account's public key
+        # records. `key add` and `key delete` change them.
+        return third in {"list", "get"}
     if verb == "conflicts":
         return third not in {"apply", "dismiss"}
     return verb in RELAXED_READ_VERBS
@@ -4765,6 +4804,50 @@ def relaxed_disposition(command: str, protected: str) -> str:
     return "ask"
 
 
+RELAXED_PRUNE_FLAG = re.compile(r"(?<![\w-])--prune(?![\w-])(?!=(?:false|0|no)\b)")
+RELAXED_ORPHAN_FLAG = re.compile(r"(?<![\w-])--orphan(?![\w-])(?!=(?:false|0|no)\b)")
+RELAXED_UNPROTECT_ALL_FLAG = re.compile(r"(?<![\w-])--unprotect-all(?![\w-])(?!=(?:false|0|no)\b)")
+
+
+def relaxed_specific_ask_sentence(command: str) -> str:
+    """The sentence for a cub v0.9.1 form whose effect the generic wording
+    ("It changes ConfigHub.") would understate. Empty when none applies."""
+    noun, verb, _third = relaxed_cub_words(command)
+    if noun == "variant" and verb == "delete":
+        if RELAXED_ORPHAN_FLAG.search(command):
+            return (
+                "It deletes the variant's Space with every Unit in it, and leaves what the "
+                "deployment already deployed running in the cluster."
+            )
+        return (
+            "It deletes the variant's Space with every Unit in it. For a deployment on a "
+            "cluster made by `cub cluster up` or `cub cluster attach`, it also removes the "
+            "deployment's Application from the cluster, which deletes what it deployed "
+            "unless `--orphan` is given."
+        )
+    if noun == "variant" and verb == "create" and RELAXED_PRUNE_FLAG.search(command):
+        return (
+            "It lets the new deployment's controller delete what the deployment deployed, "
+            "when a Unit is emptied or the deployment is removed."
+        )
+    if noun == "cluster" and verb in {"attach", "up"} and RELAXED_PRUNE_FLAG.search(command):
+        return "It lets the cluster's controller delete what a removed deployment deployed."
+    if noun == "unit" and verb == "set-protection" and RELAXED_UNPROTECT_ALL_FLAG.search(command):
+        return (
+            "It clears every protected path on the Unit, so a later merge may overwrite the "
+            "values that were held back."
+        )
+    if noun == "command" and verb == "run":
+        if relaxed_is_preview(command):
+            return (
+                "It asks a program connected to a channel to run a command. With `--dry-run` "
+                "the server only checks the request and nothing is sent, but Pilot still asks "
+                "because a server that ignored the flag would run it."
+            )
+        return "It asks a program connected to a channel to run a command."
+    return ""
+
+
 def relaxed_ask_sentence(protected: str, command: str) -> str:
     """One plain sentence on what kind of command the person is being asked about."""
     blame_words = relaxed_cub_words(command)[:2]
@@ -4783,6 +4866,9 @@ def relaxed_ask_sentence(protected: str, command: str) -> str:
         return "It contains a variable or a substitution, so Pilot cannot tell from the text exactly what would run."
     if relaxed_reveals_secret(protected, command):
         return "It touches sign-in, tokens, keys or access, or would show a secret."
+    specific = relaxed_specific_ask_sentence(command)
+    if specific:
+        return specific
     if any(mark in protected for mark in RELAXED_UNBOUNDED_LABEL_MARKS):
         return "It names no single Space, so it reads across the organisation."
     if re.search(r"\b(cancel|delete|destroy|dismiss|remove|revoke|unapprove|withdraw)\b", protected):

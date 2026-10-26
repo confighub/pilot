@@ -722,7 +722,7 @@ Teardown when the tutorial is done starts from the read-only planner
 (`pilot teardown-plan`): it verifies the current Cub help, composes
 plain `cub cluster down <name>` (`--name <name>` on cub pairs before v0.8.30) — Pilot deliberately never composes
 `--delete-config`; the cluster's ConfigHub Spaces are removed by the plan's
-separate exact-SpaceID steps, plus on cub v0.8.30 a checkpointed `cub serviceaccount delete argo-<name>` step for the account `cluster down` leaves behind — and hands each command to the person to run in
+separate exact-SpaceID steps, plus on cub v0.8.30 and v0.9.1 a checkpointed `cub serviceaccount delete argo-<name>` step for the account `cluster down` leaves behind — and hands each command to the person to run in
 THEIR terminal. The active-session hook asks before a plain `cub cluster
 down` and stops `cub cluster down --delete-config` outright; never approve or
 retry the stopped one in the assistant session. Never recommend the retired `cub lk` plugin; the current lifecycle

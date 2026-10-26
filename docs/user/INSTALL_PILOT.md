@@ -39,8 +39,8 @@ anything, and checks the result afterwards.
 | Claude Desktop, Code tab | **+**, then Add plugins, then the marketplace `confighub/pilot` | The Claude Desktop app |
 | Plain Python | `pipx install <wheel URL>`, then `pilot claude install` | Your terminal |
 
-Not supported: the Claude Desktop **chat** window. Cowork is not confirmed yet.
-Both are explained [below](#where-pilot-does-not-work-yet).
+Not supported yet: the Claude Desktop **chat** window and Claude Desktop
+**Cowork**. Both are explained [below](#where-pilot-does-not-work-yet).
 
 Every route installs the same Pilot. You can switch routes later.
 
@@ -80,8 +80,7 @@ What this sets up:
    left as it is and the installer prints the one line to add Pilot's. If
    Claude Code is not found, it prints the two `/plugin` commands for you to
    type later.
-5. It runs `pilot --version` (or `pilot doctor` when your Pilot has it) so you
-   see that it worked.
+5. It runs `pilot --version` so you see that it worked.
 
 It does not use `sudo`, does not ask for a password or a key, and downloads
 only that one Pilot file.
@@ -133,7 +132,7 @@ If you use neither `cub` nor a plugin route, install the Pilot file with
 [the release page](https://github.com/confighub/pilot/releases), for example:
 
 ```text
-pipx install https://github.com/confighub/pilot/releases/download/v0.7.0/confighub_pilot-0.7.0-py3-none-any.whl
+pipx install https://github.com/confighub/pilot/releases/download/v0.7.1/confighub_pilot-0.7.1-py3-none-any.whl
 pilot claude install --global --session-scoped
 ```
 
@@ -184,9 +183,8 @@ launcher. If you used Route 4, run `pipx uninstall confighub-pilot`.
 - **Claude Desktop chat.** The chat window ignores plugin hooks, and Pilot's
   approval guard is a hook. Without it Pilot cannot stop a change before it
   happens, so we do not support chat. Use the Code tab.
-- **Claude Desktop Cowork.** Cowork loads plugin hooks, but it is not stated
-  whether they run on your machine. We are checking, and this page will say
-  "supported" or name the gap when we know.
+- **Claude Desktop Cowork.** Pilot does not support Cowork yet. Support is
+  planned for a later release. For now, use the Code tab or the terminal.
 
 ## Licence
 

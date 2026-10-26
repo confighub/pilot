@@ -151,7 +151,7 @@ Fallback path with a local virtualenv:
 PILOT_PYTHON="${PILOT_PYTHON:-python3}"
 "$PILOT_PYTHON" -c 'import sys; assert sys.version_info >= (3, 11)'
 "$PILOT_PYTHON" -m venv /tmp/pilot-trial-venv
-/tmp/pilot-trial-venv/bin/python -m pip install https://github.com/confighub/pilot/releases/download/v0.7.0/confighub_pilot-0.7.0-py3-none-any.whl
+/tmp/pilot-trial-venv/bin/python -m pip install https://github.com/confighub/pilot/releases/download/v0.7.1/confighub_pilot-0.7.1-py3-none-any.whl
 /tmp/pilot-trial-venv/bin/pilot start --render-cockpit
 /tmp/pilot-trial-venv/bin/pilot quickstart --progress-card
 cd /path/to/the-repo-you-want-to-operate

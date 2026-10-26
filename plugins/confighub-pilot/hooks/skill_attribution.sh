@@ -1,26 +1,25 @@
 #!/usr/bin/env bash
 #
-# PreToolUse hook: per-tool-group skill attribution (issue #495 Layer 1).
+# PreToolUse hook: per-tool-group skill attribution (issue #495 Layer 1,
+# narrowed by issue #1257).
 #
-# When the agent runs a Bash command whose shape matches a known ConfigHub
-# skill body, emit one line to stderr naming the skill:
+# confighub-skills 0.5.0 ships one skill, confighub-lookup, in place of the
+# fifteen task-specific skills this hook used to name. The new skill holds no
+# command knowledge; it tells the agent to look up the installed cub's help
+# and the current docs. So the hook no longer maps a command shape to a
+# per-task skill. When the agent runs a Bash command whose shape was once
+# mapped to a task skill, emit one line to stderr that names the one skill
+# that applies:
 #
-#   → Using: cub-query    (cub unit list / cub unit get)
-#   → Using: cub-mutate   (cub function do / cub unit update / cub run)
-#   → Using: cub-apply    (cub unit apply / cub unit approve)
-#   → Using: worker-bootstrap   (cub worker install)
-#   → Using: target-bind        (cub target create / cub target update)
-#   → Using: import      (cub helm install/upgrade/template — since cub
-#                          v0.1.99 these come from the confighub/cub-helm
-#                          plugin, still invoked as `cub helm`)
-#   → Using: ingest-iac-to-confighub   (cub gitops discover/import)
+#   -> Tip: the confighub-lookup skill can check this command against your
+#      installed cub help
 #
-# This makes the kubara-style "50 Bash blocks with no skill name visible"
-# regression visible — the user can finally see which skill is firing right
-# now (the explicit ask in the customer signal that opened #495).
+# The wording is deliberate: this hook cannot see whether Claude loaded or
+# selected the skill, so the line points at it and does not claim it ran.
+# A command shape with no skill behind it prints nothing.
 #
 # Behaviour:
-#   - Always exits 0 — this hook never blocks a command.
+#   - Always exits 0 -- this hook never blocks a command.
 #   - kubectl, git, gh, plain cub --help, and quoted/heredoc cub references
 #     are ignored (same heuristic as validate_cub_flags.sh).
 #   - Output is one stderr line per matching command; never stdout.
@@ -147,37 +146,18 @@ fi
 
 SKILL=""
 
-# Lookup table — order matters: more specific shapes first so cub-mutate's
-# `cub run` match beats nothing, and `cub unit apply/approve` beats
-# `cub unit get/list`.
-if echo "$COMMAND" | grep -qE 'cub (unit )?apply\b'; then
-    SKILL="cub-apply"
-elif echo "$COMMAND" | grep -qE 'cub unit (approve|reject|unapprove)\b'; then
-    SKILL="cub-apply"
-elif echo "$COMMAND" | grep -qE 'cub function do\b'; then
-    SKILL="cub-mutate"
-elif echo "$COMMAND" | grep -qE 'cub run set-[A-Za-z0-9-]+'; then
-    SKILL="cub-mutate"
-elif echo "$COMMAND" | grep -qE 'cub unit (update|create)\b'; then
-    SKILL="cub-mutate"
-elif echo "$COMMAND" | grep -qE 'cub worker (install|delete|uninstall|create)\b'; then
-    SKILL="worker-bootstrap"
-elif echo "$COMMAND" | grep -qE 'cub target (create|update|delete)\b'; then
-    SKILL="target-bind"
-elif echo "$COMMAND" | grep -qE 'cub helm (install|upgrade|template)\b'; then
-    SKILL="import"
-elif echo "$COMMAND" | grep -qE 'cub gitops (discover|import)\b'; then
-    SKILL="ingest-iac-to-confighub"
-elif echo "$COMMAND" | grep -qE 'cub invocation create\b'; then
-    SKILL="app-config"
-elif echo "$COMMAND" | grep -qE 'cub (unit (list|get|tree|data)|revision list|space list|target list|worker list|filter list|function list)\b'; then
-    SKILL="cub-query"
+# One skill is left to name, so the old lookup table collapses to one test:
+# the command shapes that used to map to a task skill still map to the lookup
+# skill; every other shape gets no line. Coverage is unchanged.
+if echo "$COMMAND" | grep -qE 'cub (unit )?apply\b|cub unit (approve|reject|unapprove)\b|cub function do\b|cub run set-[A-Za-z0-9-]+|cub unit (update|create)\b|cub worker (install|delete|uninstall|create)\b|cub target (create|update|delete)\b|cub helm (install|upgrade|template)\b|cub gitops (discover|import)\b|cub invocation create\b|cub (unit (list|get|tree|data)|revision list|space list|target list|worker list|filter list|function list)\b'; then
+    SKILL="confighub-lookup"
 fi
 
 if [[ -n "$SKILL" ]]; then
     # One-line stderr emission. Never stdout (would interleave with tool
-    # output the user is reading). Never blocks (exit 0 below).
-    printf '→ Using: %s\n' "$SKILL" >&2
+    # output the user is reading). Never blocks (exit 0 below). The text names
+    # the skill without saying it was loaded or selected.
+    printf '→ Tip: the %s skill can check this command against your installed cub help\n' "$SKILL" >&2
 fi
 
 exit 0
