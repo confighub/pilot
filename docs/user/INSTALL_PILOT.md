@@ -132,7 +132,7 @@ If you use neither `cub` nor a plugin route, install the Pilot file with
 [the release page](https://github.com/confighub/pilot/releases), for example:
 
 ```text
-pipx install https://github.com/confighub/pilot/releases/download/v0.7.1/confighub_pilot-0.7.1-py3-none-any.whl
+pipx install https://github.com/confighub/pilot/releases/download/v0.7.2/confighub_pilot-0.7.2-py3-none-any.whl
 pilot claude install --global --session-scoped
 ```
 
@@ -185,6 +185,11 @@ launcher. If you used Route 4, run `pipx uninstall confighub-pilot`.
   happens, so we do not support chat. Use the Code tab.
 - **Claude Desktop Cowork.** Pilot does not support Cowork yet. Support is
   planned for a later release. For now, use the Code tab or the terminal.
+
+## Troubleshooting
+
+If anything gets stuck (SSH marketplace errors, `pipx` PATH, Python version,
+status line, or corpus rollback), see [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
 
 ## Licence
 

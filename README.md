@@ -25,8 +25,8 @@ If you have no GitHub SSH key and Claude cannot add the marketplace, run
 `export CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1` and try again.
 
 Every route, what each one does and how to remove Pilot are in
-[docs/user/INSTALL_PILOT.md](docs/user/INSTALL_PILOT.md). The guides that Pilot
-points you to are in [docs/user/](docs/user/).
+[docs/user/INSTALL_PILOT.md](docs/user/INSTALL_PILOT.md). Browse the complete
+[user guide index](docs/user/README.md) or jump straight in by role below.
 
 ## Start by role
 
@@ -35,8 +35,15 @@ Pick the path that matches what you came here to do:
 - **New to Pilot or ConfigHub?**
   [What is Pilot](docs/user/WHAT_IS_PILOT.md),
   [What is a governed agent for configuration](docs/user/WHAT_IS_A_GOVERNED_AGENT.md),
-  [What's new in v0.7.2](docs/user/WHATS_NEW_v0.7.2.md), or
-  [First-run walkthrough](docs/user/PORTABLE_FIRST_RUN_WALKTHROUGH.md).
+  [What's new in v0.7.2](docs/user/WHATS_NEW_v0.7.2.md),
+  [First-run walkthrough](docs/user/PORTABLE_FIRST_RUN_WALKTHROUGH.md), or
+  [What you will see](docs/user/WHAT_YOU_WILL_SEE.md).
+- **Evaluating how Pilot works and its safety boundaries?**
+  [How Pilot works](docs/user/HOW_PILOT_WORKS.md),
+  [How Pilot talks to you](docs/user/HOW_PILOT_TALKS_TO_YOU.md),
+  [Safe actions](docs/user/PILOT_SAFE_ACTIONS.md),
+  [First live win](docs/user/PILOT_FIRST_LIVE_WIN.md), or
+  [Troubleshooting & FAQ](docs/user/TROUBLESHOOTING.md).
 - **New to Argo CD or Flux?** Start read-only without a ConfigHub account:
   [Argo first look](docs/user/ARGO_FIRST_LOOK.md),
   [Flux first look](docs/user/FLUX_FIRST_LOOK.md),
@@ -58,12 +65,28 @@ Pick the path that matches what you came here to do:
 
 ## Check that it worked
 
-```text
+```bash
 pilot --version
+pilot quickstart --progress-card
+```
+
+Neither command touches a live cluster or ConfigHub. You should see `pilot 0.7.2`
+and a calm Progress Card like this:
+
+```text
+Pilot progress - First run                          Safe first step selected
+
+Proven
++ Pilot is installed and can choose a first route.
++ No ConfigHub, Git, Kubernetes, controller, or external write was allowed.
+
+Do this next
+> Move to the repo or folder you want Pilot to inspect. Then run: pilot map .
 ```
 
 Then, in Claude Code, type `/confighub-pilot:on`. Pilot stays quiet in every
-session until you do. The status line shows that Pilot is on.
+session until you do. The status line shows that Pilot is on. If anything gets
+stuck, see [docs/user/TROUBLESHOOTING.md](docs/user/TROUBLESHOOTING.md).
 
 ## Upgrade and uninstall
 
