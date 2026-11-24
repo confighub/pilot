@@ -58,8 +58,8 @@ What this sets up:
 1. `cub plugin install` adds a small launcher so that `cub pilot ...` works.
    `cub` does not check what it downloads, so the launcher does that part
    itself in the next step.
-2. `cub pilot install` needs Python 3.10 or newer. It looks for `python3.13`,
-   `python3.12`, `python3.11`, `python3.10`, then `python3`, and uses the first
+2. `cub pilot install` needs Python 3.11 or newer. It looks for `python3.14`,
+   `python3.13`, `python3.12`, `python3.11`, then `python3`, and uses the first
    one that is new enough. On a Mac the built-in `python3` is often 3.9, which
    is too old; install a newer one (`brew install python`, or from
    [python.org](https://www.python.org/downloads/)) and run it again. To pick

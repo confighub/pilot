@@ -144,7 +144,7 @@ UNIT_MUTATION_VERBS = frozenset({
     "tag",
     "update",
 })
-CONFLICT_MUTATION_FLAGS = frozenset({"--apply", "--dismiss"})
+CONFLICT_MUTATION_FLAGS = frozenset({"--apply", "--dismiss", "--undismiss"})
 GITOPS_MUTATION_VERBS = frozenset({"cleanup", "discover", "import"})
 OAUTHCLIENT_MUTATION_VERBS = frozenset({"create", "delete"})
 RELEASE_MUTATION_VERBS = frozenset({"delete", "publish", "update", "withdraw"})
@@ -4512,7 +4512,7 @@ RELAXED_KEEP_STOP_LABELS = frozenset(
         INVALID_ADDON_EXECUTABLE_INVENTORY,
     }
 )
-RELAXED_CONFLICTS_WRITE_FLAG = re.compile(r"(?<![\w-])--(?:apply|dismiss)(?![\w-])")
+RELAXED_CONFLICTS_WRITE_FLAG = re.compile(r"(?<![\w-])--(?:apply|dismiss|undismiss)(?![\w-])")
 RELAXED_RECURSIVE_FLAG = re.compile(r"(?<![\w-])--recursive(?:-force)?(?![\w-])")
 # A flag whose own name contains a variable, such as --"$F".
 RELAXED_VARIABLE_IN_FLAG_NAME = re.compile(r"(?<![\w-])--?[\w-]*[\"']?\$")
@@ -4669,7 +4669,7 @@ def relaxed_is_read(noun: str, verb: str, third: str) -> bool:
         # records. `key add` and `key delete` change them.
         return third in {"list", "get"}
     if verb == "conflicts":
-        return third not in {"apply", "dismiss"}
+        return third not in {"apply", "dismiss", "undismiss"}
     return verb in RELAXED_READ_VERBS
 
 
@@ -4807,12 +4807,31 @@ def relaxed_disposition(command: str, protected: str) -> str:
 RELAXED_PRUNE_FLAG = re.compile(r"(?<![\w-])--prune(?![\w-])(?!=(?:false|0|no)\b)")
 RELAXED_ORPHAN_FLAG = re.compile(r"(?<![\w-])--orphan(?![\w-])(?!=(?:false|0|no)\b)")
 RELAXED_UNPROTECT_ALL_FLAG = re.compile(r"(?<![\w-])--unprotect-all(?![\w-])(?!=(?:false|0|no)\b)")
+RELAXED_UNDISMISS_FLAG = re.compile(r"(?<![\w-])--undismiss(?![\w-])(?!=(?:false|0|no)\b)")
 
 
 def relaxed_specific_ask_sentence(command: str) -> str:
-    """The sentence for a cub v0.9.1 form whose effect the generic wording
+    """The sentence for a cub v0.9.1 / v0.11.11 form whose effect the generic wording
     ("It changes ConfigHub.") would understate. Empty when none applies."""
-    noun, verb, _third = relaxed_cub_words(command)
+    noun, verb, third = relaxed_cub_words(command)
+    if noun == "unit" and verb == "conflicts" and RELAXED_UNDISMISS_FLAG.search(command):
+        return "It undismisses previously dismissed merge conflicts on the Unit."
+    if noun == "cluster" and verb == "create":
+        return "It creates a local kind cluster on this machine without wiring it into ConfigHub."
+    if noun == "cluster" and verb == "controller-install":
+        return "It installs a GitOps controller in the cluster and creates its Target in ConfigHub."
+    if noun == "cluster" and verb == "svc-account-bootstrap":
+        return "It creates the cluster's ConfigHub service account and writes its credentials into the cluster."
+    if noun == "cluster" and verb == "app-bootstrap":
+        return "It creates the cluster's apps Space in ConfigHub and bootstraps the root application in the cluster."
+    if noun == "cluster" and verb == "k8sbot-install":
+        return "It installs k8sbot in a cluster already wired into ConfigHub."
+    if noun == "variant" and verb == "sync":
+        return "It overwrites the target variant's configuration and links to match the source variant."
+    if noun == "k8s" and verb == "appconfig" and third == "extract":
+        return "It splits a ConfigMap's files into separate AppConfig Units in ConfigHub and links them."
+    if noun == "changeorder" and verb == "refresh-stage":
+        return "It recomputes and updates the ChangeOrder's stage from live release status."
     if noun == "variant" and verb == "delete":
         if RELAXED_ORPHAN_FLAG.search(command):
             return (

@@ -12,13 +12,13 @@
 #   PILOT_CHANNEL_HOME       where the Pilot environment lives (default ~/.confighub/pilot)
 #   PILOT_BIN_DIR            where the `pilot` command link goes (default ~/.local/bin)
 #   PILOT_MARKETPLACE_SOURCE where Claude finds the plugin (default confighub/pilot)
-#   PILOT_PYTHON             which Python to use (default: the first of python3.13 ...
-#                            python3.10, python3 that is version 3.10 or newer)
+#   PILOT_PYTHON             which Python to use (default: the first of python3.14 ...
+#                            python3.11, python3 that is version 3.11 or newer)
 
 set -eu
 
-PILOT_VERSION="0.7.1"
-PILOT_WHEEL_SHA256="9410074d0a094b8811e8c15dd2cb63c8c1783edb0e5a662ca72353b802c4ca6f"
+PILOT_VERSION="0.7.2"
+PILOT_WHEEL_SHA256="3ae9cc484ff2c6c2da786d31494e635fa153d45dd3b6f429fdb938aa0f80a397"
 PILOT_RELEASE_BASE_URL="https://github.com/confighub/pilot/releases/download"
 PILOT_WHEEL_NAME="confighub_pilot-${PILOT_VERSION}-py3-none-any.whl"
 PILOT_PLUGIN_ID="confighub-pilot@confighub-pilot"
@@ -61,18 +61,18 @@ Install page: https://github.com/confighub/pilot#install
 EOF
 }
 
-# Find a Python that is 3.10 or newer. Try $PILOT_PYTHON first, then python3.13
-# down to python3.10, then python3. Sets PYTHON_BIN to the first one that works.
+# Find a Python that is 3.11 or newer. Try $PILOT_PYTHON first, then python3.14
+# down to python3.11, then python3. Sets PYTHON_BIN to the first one that works.
 # PYTHON_SEEN names the version of the first Python found that was too old, so
 # the stop message can say what this machine has.
 find_python() {
     PYTHON_BIN=""
     PYTHON_SEEN=""
-    for candidate in "${PILOT_PYTHON:-}" python3.13 python3.12 python3.11 python3.10 python3; do
+    for candidate in "${PILOT_PYTHON:-}" python3.14 python3.13 python3.12 python3.11 python3; do
         [ -n "$candidate" ] || continue
         found="$(command -v "$candidate" 2>/dev/null || true)"
         [ -n "$found" ] || continue
-        if "$found" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1; then
+        if "$found" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)' >/dev/null 2>&1; then
             PYTHON_BIN="$found"
             return 0
         fi
@@ -95,7 +95,7 @@ sha256_of() {
     elif [ -n "$PYTHON_BIN" ] || find_python; then
         "$PYTHON_BIN" -c 'import hashlib, sys; print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())' "$1"
     else
-        die "cannot check the download: none of sha256sum, shasum or a Python 3.10 or newer was found."
+        die "cannot check the download: none of sha256sum, shasum or a Python 3.11 or newer was found."
     fi
 }
 
@@ -243,7 +243,7 @@ do_install() {
         else
             found_text="no Python 3 was found on this machine"
         fi
-        die "Pilot needs Python 3.10 or newer; $found_text. Install Python 3.10 or newer (for example \`brew install python\` on a Mac, or from python.org), then run this again. To use a specific Python, set PILOT_PYTHON=/path/to/python3."
+        die "Pilot needs Python 3.11 or newer; $found_text. Install Python 3.11 or newer (for example \`brew install python\` on a Mac, or from python.org), then run this again. To use a specific Python, set PILOT_PYTHON=/path/to/python3."
     fi
 
     TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/pilot-install.XXXXXX")"
@@ -322,7 +322,7 @@ do_doctor() {
     if find_python; then
         say "OK    Python found: $PYTHON_BIN ($("$PYTHON_BIN" --version 2>&1))"
     else
-        say "FAIL  no Python 3.10 or newer found${PYTHON_SEEN:+ (this machine has $PYTHON_SEEN)}. Install one, or set PILOT_PYTHON=/path/to/python3."
+        say "FAIL  no Python 3.11 or newer found${PYTHON_SEEN:+ (this machine has $PYTHON_SEEN)}. Install one, or set PILOT_PYTHON=/path/to/python3."
         problems=$((problems + 1))
     fi
     if pilot_is_installed; then
